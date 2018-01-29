@@ -19,12 +19,14 @@ RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true 
 # Install SAP Neo Java Web SDK
 RUN curl -o /opt/neo-java-web-sdk.zip http://central.maven.org/maven2/com/sap/cloud/neo-java-web-sdk/${NEO_SDK_VERSION}/neo-java-web-sdk-${NEO_SDK_VERSION}.zip \
     && unzip /opt/neo-java-web-sdk.zip -d /opt/neo-java-web-sdk \
-    && rm /opt/neo-java-web-sdk.zip \
-    && echo "alias neo=/opt/neo-java-web-sdk/tools/neo.sh" >> ~/.bashrc
+    && rm /opt/neo-java-web-sdk.zip 
 
 # Install SAP MTA Builder
 COPY mta_builder.jar /opt/mta/builder.jar
-RUN echo "alias mta-builder=\"java -jar /opt/mta/builder.jar\"" >> ~/.bashrc
+
+COPY bin/. /usr/local/bin
+RUN chmod +x /usr/local/bin/neo \
+    && chmod +x /usr/local/bin/mta-builder
 
 WORKDIR /usr/src/app
 
