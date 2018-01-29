@@ -23,12 +23,70 @@ $ mta-builder --mtar yourAppName.mtar --build-target=NEO build
 
 After a successful build you need to deploy the `.mtar` file using the following command inside the Docker container:
 ```bash
-$ neo deploy-mta --user YOUR_SCP_USER --host YOUR_SCP_HOST --source yourAppName.mtar --account YOUR_SCP_SUBACCOUNT --synchronous
+$ neo deploy-mta --user YOUR_SCP_USER --host YOUR_SCP_HOST --source yourAppName.mtar --account YOUR_SCP_SUBACCOUNT --password YOUR_SCP_PASSWORD --synchronous
 ```
 
 To get more information on the MTA Builder or the Neo Java Web SDK and there corresponding flag options go to the SAP Help Portal:
 - [MTA Builder](https://help.sap.com/viewer/58746c584026430a890170ac4d87d03b/Cloud/en-US/9f778dba93934a80a51166da3ec64a05.html)
 - [Neo Java Web SDK](https://help.sap.com/viewer/65de2977205c403bbc107264b8eccf4b/Cloud/en-US/8900b22376f84c609ee9baf5bf67130a.html)
+
+# Examples
+## Gitlab CI
+```yaml
+# mta.yaml
+
+ID: sap.ui.app.yourappname
+version: 1.0.0
+_schema-version: 2.0.0
+
+parameters:
+   hcp-deployer-version: 1.2.0
+
+modules:
+  - name: scp-dockerdeployment
+    type: html5
+    path: .
+    parameters:
+      display-name: Your App Name
+      version: 1.0.0--${timestamp}
+    build-parameters:
+      builder: grunt
+      build-result: dist
+```
+
+```yaml
+# .gitlab-ci.yml
+
+image: yourRegistry/scp-deployment
+stages:
+  - build
+  - deploy
+
+build-mta:
+  stage: build
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - ui5app.mtar
+  before_script:
+    - sed -ie "s/\${timestamp}/`date +%d.%m.%Y-%H%M%S`/g" mta.yaml
+    - yarn global add grunt-cli
+  script:
+    - mta-builder --mtar ui5app.mtar --build-target=NEO build
+  tags:
+    - build
+
+deploy-mta:
+  stage: deploy
+  dependencies:
+    - build-mta
+  script:
+    - neo deploy-mta --user YOUR_SCP_USER --host YOUR_SCP_HOST --source yourAppName.mtar --account YOUR_SCP_SUBACCOUNT --password YOUR_SCP_PASSWORD --synchronous
+  only:
+    - master
+  tags:
+    - deploy
+```
 
 # Contribution
 Please note that this project is released with a [Contributor Code of Conduct](https://github.com/bastilimbach/docker-scp-deployment/blob/master/CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
