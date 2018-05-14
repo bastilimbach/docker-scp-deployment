@@ -10,7 +10,7 @@ Due to the reason that the MTA Builder is only downloadable thru the SAP Softwar
 2. Clone this repository using `git clone https://github.com/bastilimbach/docker-scp-deployment.git`
 3. Move the MTA Builder inside the previously cloned folder and rename the file to `mta_builder.jar`
 4. Build the Docker image using `docker build --pull --compress --no-cache -t scp-deployment .`
-5. *(Optional)* Tag the image to upload it to your private Docker Registry using `docker tag scp-deployment yourRegistry.com/scp-deployment` 
+5. *(Optional)* Tag the image to upload it to your private Docker Registry using `docker tag scp-deployment yourRegistry.com/scp-deployment`
 6. *(Optional)* Upload the image to your private Docker Registry using `docker push yourRegistry.com/scp-deployment`
 
 > You may need to log yourself into your private registry before pushing the image using `docker login`
@@ -70,7 +70,6 @@ build-mta:
       - ui5app.mtar
   before_script:
     - sed -ie "s/\${timestamp}/`date +%d.%m.%Y-%H%M%S`/g" mta.yaml
-    - yarn global add grunt-cli
   script:
     - mta-builder --mtar ui5app.mtar --build-target=NEO build
   tags:
